@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1B3A6B">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Finanças">
+<title>Controle Financeiro</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+  /* ── TOKENS ─────────────────────────────────────── */
+  :root {
+    --azul:       #1B3A6B;
+    --azul-med:   #2E5FA3;
+    --azul-cl:    #D6E4F7;
+    --verde:      #1A7A3E;
+    --verde-cl:   #D4EDDA;
+    --verm:       #C0392B;
+    --verm-cl:    #FDDEDE;
+    --amar:       #D4A017;
+    --amar-cl:    #FFF3CD;
+    --cinza:      #F5F6FA;
+    --cinza-2:    #E8ECF4;
+    --cinza-3:    #9AA5B4;
+    --texto:      #1C1C2E;
+    --branco:     #FFFFFF;
+    --radius:     14px;
+    --radius-sm:  8px;
+    --shadow:     0 2px 12px rgba(27,58,107,0.10);
+    --shadow-lg:  0 8px 32px rgba(27,58,107,0.18);
+    --transition: 0.18s cubic-bezier(.4,0,.2,1);
+  }
+
+  /* ── RESET ───────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--cinza);
+    color: var(--texto);
+    min-height: 100dvh;
+    -webkit-tap-highlight-color: transparent;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ──────────────────────────────────────── */
+  .header {
+    background: var(--azul);
+    padding: 48px 20px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.18);
+  }
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+  .header h1 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--branco);
+    letter-spacing: 0.3px;
+  }
+  .header-date {
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.6);
+  }
+  .config-btn {
+    background: rgba(255,255,255,0.12);
+    border: none;
+    color: var(--branco);
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background var(--transition);
+  }
+  .config-btn:active { background: rgba(255,255,255,0.25); }
+
+  /* ── NAV TABS ─────────────────────────────────────── */
+  .nav {
+    background: var(--azul);
+    display: flex;
+    padding: 0 16px 0;
+    border-bottom: 2px solid rgba(255,255,255,0.08);
+  }
+  .nav-tab {
+    flex: 1;
+    padding: 10px 4px 12px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.5);
+    text-align: center;
+    cursor: pointer;
+    border: none;
+    background: none;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: all var(--transition);
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+  }
+  .nav-tab.active {
+    color: var(--branco);
+    border-bottom-color: #60A5FA;
+  }
+  .nav-tab .tab-icon { display: block; font-size: 1.1rem; margin-bottom: 2px; }
+
+  /* ── PÁGINAS ─────────────────────────────────────── */
+  .page { display: none; padding: 16px; min-height: calc(100dvh - 140px); }
+  .page.active { display: block; }
+
+  /* ── CARDS ───────────────────────────────────────── */
+  .card {
+    background: var(--branco);
+    border-radius: var(--radius);
+    padding: 16px;
+    box-shadow: var(--shadow);
+    margin-bottom: 12px;
+  }
+  .card-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--cinza-3);
+    margin-bottom: 12px;
+  }
+
+  /* ── FORMULÁRIO ──────────────────────────────────── */
+  .form-group { margin-bottom: 14px; }
+  .form-label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--azul);
+    margin-bottom: 6px;
+  }
+  .form-label .required { color: var(--verm); margin-left: 2px; }
+
+  input, select, textarea {
+    width: 100%;
+    padding: 13px 14px;
+    border: 1.5px solid var(--cinza-2);
+    border-radius: var(--radius-sm);
+    font-size: 0.95rem;
+    font-family: inherit;
+    color: var(--texto);
+    background: var(--cinza);
+    transition: border-color var(--transition), box-shadow var(--transition);
+    -webkit-appearance: none;
+    appearance: none;
+    outline: none;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--azul-med);
+    box-shadow: 0 0 0 3px rgba(46,95,163,0.12);
+    background: var(--branco);
+  }
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239AA5B4' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+  }
+  input[type="date"] { color-scheme: light; }
+
+  /* ── VALOR INPUT ─────────────────────────────────── */
+  .valor-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .valor-prefix {
+    position: absolute;
+    left: 14px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--cinza-3);
+    pointer-events: none;
+  }
+  .valor-wrapper input { padding-left: 38px; }
+
+  /* ── BOTÕES ──────────────────────────────────────── */
+  .btn {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all var(--transition);
+    letter-spacing: 0.3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .btn-primary { background: var(--azul); color: var(--branco); }
+  .btn-primary:active { background: var(--azul-med); transform: scale(0.98); }
+  .btn-success { background: var(--verde); color: var(--branco); }
+  .btn-success:active { background: #145E30; transform: scale(0.98); }
+  .btn-danger  { background: var(--verm);  color: var(--branco); }
+  .btn-ghost {
+    background: var(--cinza);
+    color: var(--azul);
+    border: 1.5px solid var(--cinza-2);
+  }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn .spinner {
+    width: 18px; height: 18px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── TIPO SELECTOR ───────────────────────────────── */
+  .tipo-selector {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .tipo-btn {
+    padding: 12px 8px;
+    border: 2px solid var(--cinza-2);
+    border-radius: var(--radius-sm);
+    background: var(--branco);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    transition: all var(--transition);
+    color: var(--cinza-3);
+  }
+  .tipo-btn .tipo-icon { display: block; font-size: 1.4rem; margin-bottom: 3px; }
+  .tipo-btn.selected-despesa {
+    border-color: var(--verm);
+    background: var(--verm-cl);
+    color: var(--verm);
+  }
+  .tipo-btn.selected-receita {
+    border-color: var(--verde);
+    background: var(--verde-cl);
+    color: var(--verde);
+  }
+  .tipo-btn.selected-dividendo {
+    border-color: var(--azul-med);
+    background: var(--azul-cl);
+    color: var(--azul);
+  }
+
+  /* ── DASHBOARD CARDS ─────────────────────────────── */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .kpi-card {
+    background: var(--azul);
+    border-radius: var(--radius);
+    padding: 14px;
+    color: var(--branco);
+  }
+  .kpi-card.verde { background: var(--verde); }
+  .kpi-card.verm  { background: var(--verm); }
+  .kpi-card.amar  { background: linear-gradient(135deg, #1B3A6B, #2E5FA3); }
+  .kpi-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    opacity: 0.75;
+    margin-bottom: 6px;
+  }
+  .kpi-value {
+    font-size: 1.25rem;
+    font-weight: 800;
+    line-height: 1;
+  }
+  .kpi-sub {
+    font-size: 0.65rem;
+    opacity: 0.6;
+    margin-top: 4px;
+  }
+
+  /* ── HISTÓRICO ───────────────────────────────────── */
+  .hist-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--cinza-2);
+  }
+  .hist-item:last-child { border-bottom: none; }
+  .hist-icon {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+  .hist-icon.desp { background: var(--verm-cl); }
+  .hist-icon.rec  { background: var(--verde-cl); }
+  .hist-icon.div  { background: var(--azul-cl); }
+  .hist-info { flex: 1; min-width: 0; }
+  .hist-desc {
+    font-size: 0.88rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .hist-cat {
+    font-size: 0.72rem;
+    color: var(--cinza-3);
+    margin-top: 2px;
+  }
+  .hist-valor {
+    font-size: 0.95rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .hist-valor.desp { color: var(--verm); }
+  .hist-valor.rec  { color: var(--verde); }
+  .hist-valor.div  { color: var(--azul-med); }
+
+  /* ── TOAST ───────────────────────────────────────── */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--texto);
+    color: var(--branco);
+    padding: 12px 20px;
+    border-radius: 24px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    box-shadow: var(--shadow-lg);
+    z-index: 9999;
+    transition: transform 0.3s cubic-bezier(.34,1.56,.64,1);
+    white-space: nowrap;
+    max-width: 90vw;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.success { background: var(--verde); }
+  .toast.error   { background: var(--verm); }
+
+  /* ── CONFIG MODAL ────────────────────────────────── */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 500;
+    align-items: flex-end;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--branco);
+    border-radius: 20px 20px 0 0;
+    padding: 24px 20px 40px;
+    width: 100%;
+    max-height: 85dvh;
+    overflow-y: auto;
+  }
+  .modal-handle {
+    width: 40px; height: 4px;
+    background: var(--cinza-2);
+    border-radius: 2px;
+    margin: 0 auto 20px;
+  }
+  .modal-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: var(--azul);
+  }
+  .config-hint {
+    background: var(--amar-cl);
+    border-left: 3px solid var(--amar);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    font-size: 0.82rem;
+    margin-bottom: 16px;
+    line-height: 1.5;
+    color: #7A5C00;
+  }
+
+  /* ── EMPTY STATE ─────────────────────────────────── */
+  .empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--cinza-3);
+  }
+  .empty-icon { font-size: 2.5rem; margin-bottom: 12px; }
+  .empty p { font-size: 0.88rem; line-height: 1.5; }
+
+  /* ── MÊS SELECTOR ────────────────────────────────── */
+  .mes-selector {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--branco);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    box-shadow: var(--shadow);
+    margin-bottom: 12px;
+  }
+  .mes-selector span { flex: 1; font-weight: 600; font-size: 0.9rem; text-align: center; }
+  .mes-nav {
+    width: 32px; height: 32px;
+    border: none; background: var(--cinza);
+    border-radius: 50%; cursor: pointer; font-size: 1rem;
+    display: flex; align-items: center; justify-content: center;
+    transition: background var(--transition);
+  }
+  .mes-nav:active { background: var(--cinza-2); }
+
+  /* ── LOADING ─────────────────────────────────────── */
+  .loading-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(255,255,255,0.85);
+    z-index: 400;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .loading-overlay.show { display: flex; }
+  .loading-spinner {
+    width: 40px; height: 40px;
+    border: 3px solid var(--cinza-2);
+    border-top-color: var(--azul);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  .loading-text { font-size: 0.85rem; color: var(--cinza-3); font-weight: 600; }
+
+  /* ── UTILIDADES ──────────────────────────────────── */
+  .row { display: flex; gap: 8px; }
+  .row .form-group { flex: 1; }
+  .divider { height: 1px; background: var(--cinza-2); margin: 4px 0 16px; }
+  .tag {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .tag-desp { background: var(--verm-cl); color: var(--verm); }
+  .tag-rec  { background: var(--verde-cl); color: var(--verde); }
+  .tag-div  { background: var(--azul-cl); color: var(--azul-med); }
+  .text-center { text-align: center; }
+  .text-sm { font-size: 0.8rem; color: var(--cinza-3); }
+  .mt-8 { margin-top: 8px; }
+  .mb-8 { margin-bottom: 8px; }
+
+  /* ── BARRA PROGRESSO ─────────────────────────────── */
+  .progress-bar {
+    height: 8px;
+    background: var(--cinza-2);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 8px;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s ease;
+  }
+  .progress-fill.verde { background: var(--verde); }
+  .progress-fill.amar  { background: var(--amar); }
+  .progress-fill.verm  { background: var(--verm); }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-top">
+    <div>
+      <h1>💰 Controle Financeiro</h1>
+      <div class="header-date" id="headerDate"></div>
+    </div>
+    <button class="config-btn" onclick="abrirConfig()" title="Configurações">⚙️</button>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <button class="nav-tab active" onclick="mudarPagina('lancar', this)">
+    <span class="tab-icon">✏️</span>Lançar
+  </button>
+  <button class="nav-tab" onclick="mudarPagina('resumo', this)">
+    <span class="tab-icon">📊</span>Resumo
+  </button>
+  <button class="nav-tab" onclick="mudarPagina('historico', this)">
+    <span class="tab-icon">📋</span>Histórico
+  </button>
+</nav>
+
+<!-- ═══ PÁGINA: LANÇAR ═══ -->
+<div class="page active" id="page-lancar">
+
+  <!-- Tipo -->
+  <div class="tipo-selector">
+    <button class="tipo-btn selected-despesa" id="btn-despesa" onclick="selecionarTipo('despesa')">
+      <span class="tipo-icon">💸</span>Despesa
+    </button>
+    <button class="tipo-btn" id="btn-receita" onclick="selecionarTipo('receita')">
+      <span class="tipo-icon">💰</span>Receita
+    </button>
+  </div>
+
+  <div class="card">
+    <!-- Data e Valor -->
+    <div class="row">
+      <div class="form-group">
+        <label class="form-label">Data <span class="required">*</span></label>
+        <input type="date" id="campo-data">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Valor <span class="required">*</span></label>
+        <div class="valor-wrapper">
+          <span class="valor-prefix">R$</span>
+          <input type="number" id="campo-valor" placeholder="0,00" step="0.01" min="0" inputmode="decimal">
+        </div>
+      </div>
+    </div>
+
+    <!-- Categoria -->
+    <div class="form-group" id="grupo-categoria">
+      <label class="form-label">Categoria <span class="required">*</span></label>
+      <select id="campo-categoria" onchange="atualizarSubcategorias()">
+        <option value="">Selecione...</option>
+      </select>
+    </div>
+
+    <!-- Subcategoria (só despesas) -->
+    <div class="form-group" id="grupo-subcategoria" style="display:none">
+      <label class="form-label">Subcategoria</label>
+      <select id="campo-subcategoria">
+        <option value="">Selecione...</option>
+      </select>
+    </div>
+
+    <!-- Descrição -->
+    <div class="form-group">
+      <label class="form-label">Descrição</label>
+      <input type="text" id="campo-descricao" placeholder="Ex: Supermercado Carrefour" maxlength="60">
+    </div>
+
+    <!-- Forma de Pagamento (só despesas) -->
+    <div class="form-group" id="grupo-pagamento">
+      <label class="form-label">Forma de Pagamento</label>
+      <select id="campo-pagamento">
+        <option value="Débito">Débito</option>
+        <option value="Pix">Pix</option>
+        <option value="Dinheiro">Dinheiro</option>
+        <option value="Cartão Nubank">Cartão Nubank</option>
+        <option value="Cartão Itaú">Cartão Itaú</option>
+        <option value="Vale Refeição">Vale Refeição</option>
+        <option value="Outros">Outros</option>
+      </select>
+    </div>
+
+    <!-- Ativo/Fonte (só dividendos) -->
+    <div class="form-group" id="grupo-ativo" style="display:none">
+      <label class="form-label">Ativo / Fonte</label>
+      <input type="text" id="campo-ativo" placeholder="Ex: HGLG11, MXRF11" maxlength="20">
+    </div>
+
+  </div>
+
+  <button class="btn btn-danger" id="btn-lancar" onclick="lancarRegistro()">
+    <span>💸</span> Lançar Despesa
+  </button>
+
+  <p class="text-sm text-center mt-8" id="status-config-aviso">
+    ⚙️ Configure a URL do Apps Script antes de usar
+  </p>
+
+</div>
+
+<!-- ═══ PÁGINA: RESUMO ═══ -->
+<div class="page" id="page-resumo">
+
+  <div class="mes-selector">
+    <button class="mes-nav" onclick="navegarMes(-1)">‹</button>
+    <span id="mes-display">Junho/2026</span>
+    <button class="mes-nav" onclick="navegarMes(1)">›</button>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-label">💰 Receitas</div>
+      <div class="kpi-value" id="kpi-receitas">—</div>
+      <div class="kpi-sub">do mês</div>
+    </div>
+    <div class="kpi-card verm">
+      <div class="kpi-label">💸 Despesas</div>
+      <div class="kpi-value" id="kpi-despesas">—</div>
+      <div class="kpi-sub">do mês</div>
+    </div>
+    <div class="kpi-card verde">
+      <div class="kpi-label">📈 Saldo</div>
+      <div class="kpi-value" id="kpi-saldo">—</div>
+      <div class="kpi-sub">do mês</div>
+    </div>
+    <div class="kpi-card amar">
+      <div class="kpi-label">💵 Dividendos</div>
+      <div class="kpi-value" id="kpi-dividendos">—</div>
+      <div class="kpi-sub">do mês</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Gastos por categoria</div>
+    <div id="lista-categorias">
+      <div class="empty">
+        <div class="empty-icon">📊</div>
+        <p>Configure a planilha e carregue os dados do resumo</p>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn btn-primary" onclick="carregarResumo()">
+    🔄 Atualizar dados
+  </button>
+
+</div>
+
+<!-- ═══ PÁGINA: HISTÓRICO ═══ -->
+<div class="page" id="page-historico">
+  <div class="card">
+    <div class="card-title">Últimos lançamentos</div>
+    <div id="lista-historico">
+      <div class="empty">
+        <div class="empty-icon">📋</div>
+        <p>Seus lançamentos recentes aparecerão aqui após sincronizar</p>
+      </div>
+    </div>
+  </div>
+  <button class="btn btn-ghost mt-8" onclick="carregarHistorico()">
+    🔄 Sincronizar
+  </button>
+</div>
+
+<!-- MODAL CONFIGURAÇÃO -->
+<div class="modal-overlay" id="modal-config">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">⚙️ Configuração da Planilha</div>
+
+    <div class="config-hint">
+      <strong>Como conectar:</strong><br>
+      1. Abra sua planilha no Google Sheets<br>
+      2. Vá em Extensões → Apps Script<br>
+      3. Cole o código do arquivo <strong>AppScript_PWA.gs</strong><br>
+      4. Implante como "App da Web" e copie a URL<br>
+      5. Cole a URL abaixo e salve
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">ID da Planilha Google Sheets</label>
+      <input type="text" id="config-sheet-id" placeholder="(opcional) ID da planilha para referência">
+    </div>
+
+    <div class="config-hint" style="margin-top:8px">
+      <strong>URL do Apps Script:</strong><br>
+      Cole aqui a URL gerada ao implantar o Apps Script como "App da Web"
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">URL do Apps Script <span style="color:#C0392B">*</span></label>
+      <input type="text" id="config-api-key" placeholder="https://script.google.com/macros/s/...">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Nome da aba — Despesas</label>
+      <input type="text" id="config-aba-despesas" placeholder="Despesas" value="Despesas">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Nome da aba — Receitas</label>
+      <input type="text" id="config-aba-receitas" placeholder="Receitas" value="Receitas">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Nome da aba — Dividendos</label>
+      <input type="text" id="config-aba-dividendos" placeholder="Dividendos" value="Dividendos">
+    </div>
+
+    <div class="divider"></div>
+
+    <button class="btn btn-primary mb-8" onclick="salvarConfig()">💾 Salvar configuração</button>
+    <button class="btn btn-ghost" onclick="fecharConfig()">Cancelar</button>
+  </div>
+</div>
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loading">
+  <div class="loading-spinner"></div>
+  <div class="loading-text" id="loading-text">Salvando...</div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+//  DADOS
+// ══════════════════════════════════════════════════════════════
+const CATEGORIAS_DESPESA = {
+  'Moradia':      ['Aluguel','Condomínio','IPTU','Energia','Água','Gás','Internet','Outros'],
+  'Alimentação':  ['Mercado','Delivery','Restaurante','Outros'],
+  'Transporte':   ['Combustível','Uber','Manutenção','Estacionamento','Outros'],
+  'Lazer':        ['Cinema','Viagem','Hobbies','Eventos','Outros'],
+  'Assinaturas':  ['Netflix','Spotify','Amazon Prime','Outras Assinaturas'],
+  'Saúde':        ['Plano de Saúde','Farmácia','Consultas','Outros'],
+  'Educação':     ['Cursos','Livros','Outros'],
+  'Vestuário':    ['Roupas','Calçados','Outros'],
+  'Outros':       ['Outros'],
+};
+const CATEGORIAS_RECEITA = ['Salário','Férias','13º','Renda Extra','Outros'];
+const MESES_PT = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
+                  'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+let tipoAtual = 'despesa';
+let mesAtual  = new Date();
+let historico = JSON.parse(localStorage.getItem('historico') || '[]');
+
+// ══════════════════════════════════════════════════════════════
+//  CONFIG
+// ══════════════════════════════════════════════════════════════
+function getConfig() {
+  return {
+    sheetId:      localStorage.getItem('sheetId') || '',
+    scriptUrl:    localStorage.getItem('apiKey') || '',
+    abaDespesas:  localStorage.getItem('abaDespesas') || 'Despesas',
+    abaReceitas:  localStorage.getItem('abaReceitas') || 'Receitas',
+    abaDividendos:localStorage.getItem('abaDividendos') || 'Dividendos',
+  };
+}
+function temConfig() {
+  const c = getConfig();
+  return c.scriptUrl;
+}
+function salvarConfig() {
+  localStorage.setItem('sheetId',       document.getElementById('config-sheet-id').value.trim());
+  localStorage.setItem('apiKey',        document.getElementById('config-api-key').value.trim());
+  localStorage.setItem('abaDespesas',   document.getElementById('config-aba-despesas').value.trim());
+  localStorage.setItem('abaReceitas',   document.getElementById('config-aba-receitas').value.trim());
+  localStorage.setItem('abaDividendos', document.getElementById('config-aba-dividendos').value.trim());
+  fecharConfig();
+  atualizarAvisoConfig();
+  mostrarToast('✅ Configuração salva!', 'success');
+}
+function abrirConfig() {
+  const c = getConfig();
+  document.getElementById('config-sheet-id').value  = c.sheetId;
+  document.getElementById('config-api-key').value   = c.apiKey;
+  document.getElementById('config-aba-despesas').value   = c.abaDespesas;
+  document.getElementById('config-aba-receitas').value   = c.abaReceitas;
+  document.getElementById('config-aba-dividendos').value = c.abaDividendos;
+  document.getElementById('modal-config').classList.add('open');
+}
+function fecharConfig() {
+  document.getElementById('modal-config').classList.remove('open');
+}
+function atualizarAvisoConfig() {
+  document.getElementById('status-config-aviso').style.display = temConfig() ? 'none' : 'block';
+}
+
+// ══════════════════════════════════════════════════════════════
+//  NAVEGAÇÃO
+// ══════════════════════════════════════════════════════════════
+function mudarPagina(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'historico') renderizarHistorico();
+  if (id === 'resumo') atualizarMesDisplay();
+}
+
+// ══════════════════════════════════════════════════════════════
+//  FORMULÁRIO
+// ══════════════════════════════════════════════════════════════
+function selecionarTipo(tipo) {
+  tipoAtual = tipo;
+  ['despesa','receita'].forEach(t => {
+    document.getElementById('btn-' + t).className =
+      'tipo-btn' + (t === tipo ? ' selected-' + t : '');
+  });
+
+  // Mostra/oculta campos
+  const isDespesa  = tipo === 'despesa';
+  const isReceita  = tipo === 'receita';
+
+  document.getElementById('grupo-subcategoria').style.display = isDespesa ? 'block' : 'none';
+  document.getElementById('grupo-pagamento').style.display    = isDespesa ? 'block' : 'none';
+  document.getElementById('grupo-ativo').style.display        = 'none';
+
+  // Categorias
+  const sel = document.getElementById('campo-categoria');
+  sel.innerHTML = '<option value="">Selecione...</option>';
+
+  if (isDespesa) {
+    Object.keys(CATEGORIAS_DESPESA).forEach(cat => {
+      sel.innerHTML += `<option value="${cat}">${cat}</option>`;
+    });
+  } else {
+    CATEGORIAS_RECEITA.forEach(cat => {
+      sel.innerHTML += `<option value="${cat}">${cat}</option>`;
+    });
+  }
+
+  // Botão
+  const btn = document.getElementById('btn-lancar');
+  btn.className = 'btn ' + (isDespesa ? 'btn-danger' : 'btn-success');
+  btn.innerHTML = isDespesa ? '<span>💸</span> Lançar Despesa' : '<span>💰</span> Lançar Receita';
+}
+
+function atualizarSubcategorias() {
+  const cat  = document.getElementById('campo-categoria').value;
+  const sel  = document.getElementById('campo-subcategoria');
+  const subs = CATEGORIAS_DESPESA[cat] || [];
+  sel.innerHTML = '<option value="">Selecione...</option>';
+  subs.forEach(s => { sel.innerHTML += `<option value="${s}">${s}</option>`; });
+}
+
+// ══════════════════════════════════════════════════════════════
+//  LANÇAR
+// ══════════════════════════════════════════════════════════════
+async function lancarRegistro() {
+  if (!temConfig()) {
+    mostrarToast('⚙️ Configure a planilha primeiro', 'error');
+    abrirConfig();
+    return;
+  }
+
+  const data    = document.getElementById('campo-data').value;
+  const valor   = parseFloat(document.getElementById('campo-valor').value);
+  const cat     = document.getElementById('campo-categoria').value;
+  const sub     = document.getElementById('campo-subcategoria').value;
+  const desc    = document.getElementById('campo-descricao').value.trim();
+  const pgto    = document.getElementById('campo-pagamento').value;
+  const ativo   = document.getElementById('campo-ativo').value.trim();
+
+  if (!data)  { mostrarToast('Informe a data', 'error'); return; }
+  if (!valor || valor <= 0) { mostrarToast('Informe um valor válido', 'error'); return; }
+  if (!cat)   { mostrarToast('Selecione a categoria', 'error'); return; }
+
+  const dataObj  = new Date(data + 'T12:00:00');
+  const mesAno   = MESES_PT[dataObj.getMonth()] + '/' + dataObj.getFullYear();
+  const dataFmt  = dataObj.toLocaleDateString('pt-BR');
+
+  mostrarLoading('Salvando na planilha...');
+
+  try {
+    const cfg  = getConfig();
+    let aba, linha;
+
+    if (tipoAtual === 'despesa') {
+      aba   = cfg.abaDespesas;
+      linha = [dataFmt, cat, sub || '', desc || cat, valor, pgto, mesAno];
+    } else {
+      aba   = cfg.abaReceitas;
+      linha = [dataFmt, cat, desc || cat, valor, mesAno];
+    }
+
+    await appendToSheet(cfg.sheetId, cfg.apiKey, aba, linha);
+
+    // Salva localmente no histórico
+    historico.unshift({
+      tipo: tipoAtual, data: dataFmt, cat, desc: desc || cat,
+      valor, pgto: tipoAtual === 'despesa' ? pgto : null, mesAno,
+      id: Date.now()
+    });
+    if (historico.length > 50) historico = historico.slice(0, 50);
+    localStorage.setItem('historico', JSON.stringify(historico));
+
+    ocultarLoading();
+    mostrarToast('✅ Lançado com sucesso!', 'success');
+    limparFormulario();
+
+  } catch (err) {
+    ocultarLoading();
+    console.error(err);
+    mostrarToast('❌ Erro: ' + (err.message || 'Verifique a configuração'), 'error');
+  }
+}
+
+async function appendToSheet(sheetId, apiKey, aba, valores) {
+  // Usa Apps Script como intermediário — não precisa de API Key nem OAuth
+  const cfg = getConfig();
+  const url = cfg.scriptUrl;
+  if (!url) throw new Error('URL do Apps Script não configurada');
+
+  const resp = await fetch(url, {
+    method: 'POST',
+    redirect: 'follow',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify({ acao: 'gravar', aba, linha: valores })
+  });
+
+  const texto = await resp.text();
+  let data;
+  try { data = JSON.parse(texto); } catch { throw new Error('Resposta inválida do servidor'); }
+  if (!data.ok) throw new Error(data.erro || 'Erro ao gravar');
+  return data;
+}
+
+function limparFormulario() {
+  document.getElementById('campo-valor').value    = '';
+  document.getElementById('campo-descricao').value = '';
+  document.getElementById('campo-subcategoria').value = '';
+  // Mantém data e categoria para facilitar múltiplos lançamentos do mesmo tipo
+}
+
+// ══════════════════════════════════════════════════════════════
+//  RESUMO
+// ══════════════════════════════════════════════════════════════
+function navegarMes(dir) {
+  mesAtual = new Date(mesAtual.getFullYear(), mesAtual.getMonth() + dir, 1);
+  atualizarMesDisplay();
+}
+function atualizarMesDisplay() {
+  document.getElementById('mes-display').textContent =
+    MESES_PT[mesAtual.getMonth()] + '/' + mesAtual.getFullYear();
+}
+
+async function carregarResumo() {
+  if (!temConfig()) { mostrarToast('Configure a planilha primeiro', 'error'); abrirConfig(); return; }
+
+  mostrarLoading('Carregando resumo...');
+  try {
+    const cfg    = getConfig();
+    const mesStr = MESES_PT[mesAtual.getMonth()] + '/' + mesAtual.getFullYear();
+
+    // Usa a ação "resumo" do Apps Script — mais eficiente (1 chamada só)
+    const resp = await fetch(cfg.scriptUrl + '?acao=ler&aba=Despesas&range=B5:G999', { redirect: 'follow' });
+    const txt  = await resp.text();
+    const resDesp = JSON.parse(txt);
+
+    const resp2 = await fetch(cfg.scriptUrl + '?acao=ler&aba=Receitas&range=A5:E504', { redirect: 'follow' });
+    const resRec = JSON.parse(await resp2.text());
+
+    const resp3 = await fetch(cfg.scriptUrl + '?acao=ler&aba=Dividendos&range=A5:E304', { redirect: 'follow' });
+    const resDiv = JSON.parse(await resp3.text());
+
+    const despesasMes = (resDesp.valores  || []).filter(r => String(r[5]) === mesStr);
+    const receitasMes = (resRec.valores   || []).filter(r => String(r[4]) === mesStr);
+    const dividMes    = (resDiv.valores   || []).filter(r => String(r[3]) === mesStr);
+
+    const totalDesp = despesasMes.reduce((s,r) => s + (parseFloat(String(r[3]).replace(',','.')) || 0), 0);
+    const totalRec  = receitasMes.reduce((s,r) => s + (parseFloat(String(r[3]).replace(',','.')) || 0), 0);
+    const totalDiv  = dividMes.reduce((s,r)    => s + (parseFloat(String(r[2]).replace(',','.')) || 0), 0);
+    const saldo     = totalRec + totalDiv - totalDesp;
+
+    document.getElementById('kpi-receitas').textContent   = fmtBRL(totalRec);
+    document.getElementById('kpi-despesas').textContent   = fmtBRL(totalDesp);
+    document.getElementById('kpi-saldo').textContent      = fmtBRL(saldo);
+    document.getElementById('kpi-dividendos').textContent = fmtBRL(totalDiv);
+
+    document.querySelector('.kpi-card.verde').style.background =
+      saldo >= 0 ? 'var(--verde)' : 'var(--verm)';
+
+    const catTotais = {};
+    despesasMes.forEach(r => {
+      const cat = r[0] || 'Outros';
+      catTotais[cat] = (catTotais[cat] || 0) + (parseFloat(String(r[3]).replace(',','.')) || 0);
+    });
+
+    const sorted = Object.entries(catTotais).sort((a,b) => b[1]-a[1]);
+    const lista  = document.getElementById('lista-categorias');
+
+    if (sorted.length === 0) {
+      lista.innerHTML = '<div class="empty"><div class="empty-icon">🎉</div><p>Nenhuma despesa neste mês</p></div>';
+    } else {
+      lista.innerHTML = sorted.map(([cat, val]) => {
+        const pct = totalDesp > 0 ? (val / totalDesp * 100).toFixed(0) : 0;
+        const cor = val / totalDesp > 0.4 ? 'verm' : val / totalDesp > 0.2 ? 'amar' : 'verde';
+        return `
+          <div style="margin-bottom:14px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+              <span style="font-size:0.85rem;font-weight:600">${cat}</span>
+              <span style="font-size:0.85rem;font-weight:700;color:var(--verm)">${fmtBRL(val)}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div class="progress-bar" style="flex:1">
+                <div class="progress-fill ${cor}" style="width:${pct}%"></div>
+              </div>
+              <span style="font-size:0.7rem;color:var(--cinza-3);width:30px;text-align:right">${pct}%</span>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    ocultarLoading();
+    mostrarToast('✅ Dados atualizados', 'success');
+
+  } catch(err) {
+    ocultarLoading();
+    mostrarToast('❌ ' + (err.message || 'Erro ao carregar'), 'error');
+    console.error(err);
+  }
+}
+
+async function lerAba(sheetId, apiKey, aba, range) {
+  const cfg = getConfig();
+  const url = cfg.scriptUrl;
+  if (!url) throw new Error('URL do Apps Script não configurada');
+
+  const params = new URLSearchParams({ acao: 'ler', aba, range });
+  const resp   = await fetch(`${url}?${params}`, { redirect: 'follow' });
+  const texto  = await resp.text();
+  let data;
+  try { data = JSON.parse(texto); } catch { throw new Error('Resposta inválida'); }
+  if (!data.ok) throw new Error(data.erro || 'Erro ao ler');
+  return data.valores || [];
+}
+
+// ══════════════════════════════════════════════════════════════
+//  HISTÓRICO
+// ══════════════════════════════════════════════════════════════
+async function carregarHistorico() {
+  if (!temConfig()) { mostrarToast('Configure a planilha primeiro', 'error'); abrirConfig(); return; }
+
+  mostrarLoading('Carregando histórico...');
+  try {
+    const cfg = getConfig();
+    const [desp, rec] = await Promise.all([
+      lerAba(cfg.sheetId, cfg.apiKey, cfg.abaDespesas,  'A5:G30'),
+      lerAba(cfg.sheetId, cfg.apiKey, cfg.abaReceitas,  'A5:E20'),
+    ]);
+
+    historico = [];
+    (desp || []).reverse().slice(0, 20).forEach(r => {
+      if (!r[0]) return;
+      historico.push({ tipo:'despesa', data:r[0], cat:r[1]||'', desc:r[3]||r[1]||'',
+                       valor:parseFloat(String(r[4]).replace(',','.'))||0,
+                       pgto:r[5]||'', mesAno:r[6]||'' });
+    });
+    (rec || []).reverse().slice(0, 10).forEach(r => {
+      if (!r[0]) return;
+      historico.push({ tipo:'receita', data:r[0], cat:r[1]||'', desc:r[2]||r[1]||'',
+                       valor:parseFloat(String(r[3]).replace(',','.'))||0 });
+    });
+
+    historico.sort((a,b) => {
+      const da = a.data.split('/').reverse().join('-');
+      const db = b.data.split('/').reverse().join('-');
+      return db.localeCompare(da);
+    });
+
+    localStorage.setItem('historico', JSON.stringify(historico));
+    renderizarHistorico();
+    ocultarLoading();
+    mostrarToast('✅ Histórico atualizado', 'success');
+
+  } catch(err) {
+    ocultarLoading();
+    mostrarToast('❌ ' + (err.message || 'Erro ao carregar'), 'error');
+  }
+}
+
+function renderizarHistorico() {
+  const lista = document.getElementById('lista-historico');
+  if (!historico.length) {
+    lista.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><p>Nenhum lançamento ainda.<br>Toque em "Sincronizar" para carregar.</p></div>';
+    return;
+  }
+  const icones = { despesa:'💸', receita:'💰', dividendo:'💵' };
+  lista.innerHTML = historico.slice(0, 20).map(h => `
+    <div class="hist-item">
+      <div class="hist-icon ${h.tipo}">
+        ${icones[h.tipo] || '📌'}
+      </div>
+      <div class="hist-info">
+        <div class="hist-desc">${h.desc || h.cat}</div>
+        <div class="hist-cat">${h.cat} · ${h.data}</div>
+      </div>
+      <div class="hist-valor ${h.tipo}">
+        ${h.tipo === 'despesa' ? '-' : '+'}${fmtBRL(h.valor)}
+      </div>
+    </div>
+  `).join('');
+}
+
+// ══════════════════════════════════════════════════════════════
+//  UTILITÁRIOS
+// ══════════════════════════════════════════════════════════════
+function fmtBRL(v) {
+  return new Intl.NumberFormat('pt-BR', { style:'currency', currency:'BRL', maximumFractionDigits:0 }).format(v || 0);
+}
+
+function mostrarToast(msg, tipo = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className   = 'toast ' + tipo;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function mostrarLoading(txt = 'Carregando...') {
+  document.getElementById('loading-text').textContent = txt;
+  document.getElementById('loading').classList.add('show');
+}
+function ocultarLoading() {
+  document.getElementById('loading').classList.remove('show');
+}
+
+// ══════════════════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════════════════
+function init() {
+  // Data de hoje
+  const hoje = new Date();
+  document.getElementById('campo-data').value = hoje.toISOString().split('T')[0];
+  document.getElementById('headerDate').textContent =
+    hoje.toLocaleDateString('pt-BR', { weekday:'long', day:'numeric', month:'long' });
+
+  // Mês atual no resumo
+  mesAtual = hoje;
+  atualizarMesDisplay();
+
+  // Categorias iniciais
+  selecionarTipo('despesa');
+
+  // Aviso de config
+  atualizarAvisoConfig();
+
+  // Fecha modal ao clicar fora
+  document.getElementById('modal-config').addEventListener('click', function(e) {
+    if (e.target === this) fecharConfig();
+  });
+
+  // Histórico local
+  renderizarHistorico();
+}
+
+init();
+</script>
+
+<script>
+// Registra Service Worker para funcionamento offline
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(() => console.log('SW registrado'))
+      .catch(err => console.log('SW erro:', err));
+  });
+}
+</script>
+
+</body>
+</html>
